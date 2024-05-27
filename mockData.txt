@@ -1,0 +1,40 @@
+
+// Creating user & student at the same time, 
+
+{
+    "password": "securePassword123!",
+    "student": {
+        "id": "123",
+        "name": {
+            "firstName": "John",
+            "middleName": "Ton",
+            "lastName": "Doe"
+        },
+        "gender": "male",
+        "dateOfBirth": "2002-04-15",
+        "email": "john.doe@example.com",
+        "contactNo": "+1234567890",
+        "emergencyContactNo": "+0987654321",
+        "bloogGroup": "O+",
+        "presentAddress": "123 Elm Street, Springfield, IL, 62704",
+        "permanentAddress": "456 Oak Street, Springfield, IL, 62705",
+        "guardian": {
+            "motherName": "Jane Doe",
+            "motherContactNo": "+1234567891",
+            "motherOccupation": "Teacher",
+            "fatherName": "Jack Doe",
+            "fatherContactNo": "+1234567893",
+            "fatherOccupation": "Engineer",
+            "address": "456 Oak Street, Springfield, IL, 62705"
+        },
+        "localGuardian": {
+            "name": "Michael Smith",
+            "relation": "Uncle",
+            "contactNo": "+1234567892",
+            "address": "789 Pine Street, Springfield, IL, 62706",
+            "occupation": "Lawyer"
+        },
+        "profileImg": "https://example.com/profile/john_doe.jpg",
+        "isDeleted": false
+    }
+}
