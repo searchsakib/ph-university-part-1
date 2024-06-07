@@ -23,7 +23,7 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
 
   // for admissionSemester type error, I had to write this
   if (!admissionSemester) {
-    throw new Error('Admission Semester not found');
+    throw new AppError('Admission Semester not found');
   }
 
   //set auto generated id
