@@ -3,6 +3,7 @@ import { Student } from './student.model';
 import AppError from '../../errors/AppError';
 import httpStatus from 'http-status';
 import { User } from '../user/user.model';
+import { TStudent } from './student.interface';
 
 const getAllStudentsFromDB = async () => {
   const result = await Student.find()
@@ -17,7 +18,7 @@ const getAllStudentsFromDB = async () => {
 };
 
 const getSingleStudentFromDB = async (id: string) => {
-  const result = await Student.findById(id)
+  const result = await Student.findOne({ id })
     .populate('admissionSemester')
     .populate({
       path: 'academicDepartment',
@@ -25,6 +26,14 @@ const getSingleStudentFromDB = async (id: string) => {
         path: 'AcademicFaculty',
       },
     });
+  return result;
+};
+
+const updateSingleStudentIntoDB = async (
+  id: string,
+  payload: Partial<TStudent>,
+) => {
+  const result = await Student.findOneAndUpdate({ id }, payload, { new: true });
   return result;
 };
 
@@ -58,11 +67,13 @@ const deleteStudentFromDB = async (id: string) => {
   } catch (err) {
     await session.abortTransaction();
     await session.endSession();
+    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to Delete user');
   }
 };
 
 export const StudentServices = {
   getAllStudentsFromDB,
   getSingleStudentFromDB,
+  updateSingleStudentIntoDB,
   deleteStudentFromDB,
 };
