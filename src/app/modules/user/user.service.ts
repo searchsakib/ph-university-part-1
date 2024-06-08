@@ -7,6 +7,7 @@ import { Student } from '../student/student.model';
 import { TUser } from './user.interface';
 import { User } from './user.model';
 import { generateStudentId } from './user.utils';
+import mongoose, { startSession } from 'mongoose';
 
 const createStudentIntoDB = async (password: string, payload: TStudent) => {
   // create a user object
@@ -28,20 +29,41 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
     throw new AppError(httpStatus.NOT_FOUND, 'Admission Semester not found');
   }
 
-  //set auto generated id
-  userData.id = await generateStudentId(admissionSemester);
+  //! strating isolating rollback session
+  const session = await mongoose.startSession();
 
-  // create a user
-  const newUser = await User.create(userData);
+  try {
+    //! starting transaction
+    session.startTransaction();
+    //set auto generated id
+    userData.id = await generateStudentId(admissionSemester);
 
-  //create a student
-  if (Object.keys(newUser).length) {
-    // set id , _id as user
-    payload.id = newUser.id;
-    payload.user = newUser._id; //reference _id
+    // create a user
+    const newUser = await User.create([userData], { session }); //! adding data as array , adding session
 
-    const newStudent = await Student.create(payload);
-    return newStudent;
+    //create a student
+    if (newUser.length) {
+      // set id , _id as user
+      payload.id = newUser[0].id;
+      payload.user = newUser[0]._id; //reference _id
+
+      const newStudent = await Student.create([payload], { session });
+
+      //! if student is not created
+      if (!newStudent.length) {
+        throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create student');
+      }
+
+      //! committing successfull transaction & ending session
+      await session.commitTransaction();
+      await session.endSession();
+
+      return newStudent;
+    }
+  } catch (err) {
+    //! if any error occurs, aborting transaction & ending session
+    await session.abortTransaction();
+    await session.endSession();
   }
 };
 
