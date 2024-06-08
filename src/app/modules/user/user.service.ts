@@ -1,4 +1,6 @@
+import httpStatus from 'http-status';
 import config from '../../config';
+import AppError from '../../errors/AppError';
 import { AcademicSemester } from '../academicSemester/academicSemester.model';
 import { TStudent } from '../student/student.interface';
 import { Student } from '../student/student.model';
@@ -23,7 +25,7 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
 
   // for admissionSemester type error, I had to write this
   if (!admissionSemester) {
-    throw new AppError('Admission Semester not found');
+    throw new AppError(httpStatus.NOT_FOUND, 'Admission Semester not found');
   }
 
   //set auto generated id
