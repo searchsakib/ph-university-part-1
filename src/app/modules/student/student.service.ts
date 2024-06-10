@@ -4,79 +4,85 @@ import AppError from '../../errors/AppError';
 import httpStatus from 'http-status';
 import { User } from '../user/user.model';
 import { TStudent } from './student.interface';
+import QueryBuilder from '../../builder/QueryBuilder';
+import { studentSearchableFields } from './student.constant';
 
 const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
   console.log('base query', query);
-  const queryObj = { ...query };
 
-  const studentSearchableFields = [
-    'email',
-    'name.firstName',
-    'name.middleName',
-    'name.lastName',
-    'presentAddress',
-  ];
+  //! With Functional Programming commented here , did the same thing in QueryBuilder.ts with OOP (object oriented programming) with Class-Based approach
+  // const queryObj = { ...query };
 
-  let searchTerm = '';
-  if (query?.searchTerm) {
-    searchTerm = query?.searchTerm as string;
-  }
+  // let searchTerm = '';
+  // if (query?.searchTerm) {
+  //   searchTerm = query?.searchTerm as string;
+  // }
 
-  const searchQuery = Student.find({
-    $or: studentSearchableFields.map((field) => ({
-      [field]: { $regex: searchTerm, $options: 'i' },
-    })),
-  });
+  // const searchQuery = Student.find({
+  //   $or: studentSearchableFields.map((field) => ({
+  //     [field]: { $regex: searchTerm, $options: 'i' },
+  //   })),
+  // });
 
   // filtering
-  const excludeFields = ['searchTerm', 'sort', 'limit', 'page', 'fields'];
-  excludeFields.forEach((el) => delete queryObj[el]);
-  console.log({ query, queryObj });
+  // const excludeFields = ['searchTerm', 'sort', 'limit', 'page', 'fields'];
+  // excludeFields.forEach((el) => delete queryObj[el]);
 
-  const filterQuery = searchQuery
-    .find(queryObj)
-    .populate('admissionSemester')
-    .populate({
-      path: 'academicDepartment',
-      populate: {
-        path: 'AcademicFaculty',
-      },
-    });
+  // const filterQuery = searchQuery
+  //   .find(queryObj)
+  //   .populate('admissionSemester')
+  //   .populate({
+  //     path: 'academicDepartment',
+  //     populate: {
+  //       path: 'AcademicFaculty',
+  //     },
+  //   });
 
-  let sort = '-createdAt';
-  if (query.sort) {
-    sort = query.sort as string;
-  }
+  // let sort = '-createdAt';
+  // if (query.sort) {
+  //   sort = query.sort as string;
+  // }
 
-  const sortQuery = filterQuery.sort(sort);
+  // const sortQuery = filterQuery.sort(sort);
 
-  let page = 1;
-  let limit = 1;
-  let skip = 0;
+  // let page = 1;
+  // let limit = 1;
+  // let skip = 0;
 
-  if (query.limit) {
-    limit = Number(query.limit);
-  }
-  if (query.page) {
-    page = Number(query.page);
-    skip = (page - 1) * limit;
-  }
+  // if (query.limit) {
+  //   limit = Number(query.limit);
+  // }
+  // if (query.page) {
+  //   page = Number(query.page);
+  //   skip = (page - 1) * limit;
+  // }
 
-  const paginateQuery = sortQuery.skip(skip);
+  // const paginateQuery = sortQuery.skip(skip);
 
-  const limitQuery = paginateQuery.limit(limit);
+  // const limitQuery = paginateQuery.limit(limit);
 
   // field limiting
-  let fields = '-__v';
+  // let fields = '-__v';
 
-  if (query.fields) {
-    fields = (query.fields as string).split(',').join(' ');
-    console.log({ fields });
-  }
+  // if (query.fields) {
+  //   fields = (query.fields as string).split(',').join(' ');
+  //   console.log({ fields });
+  // }
 
-  const fieldQuery = await limitQuery.select(fields);
+  // const fieldQuery = await limitQuery.select(fields);
 
-  return fieldQuery;
+  // return fieldQuery;
+
+  //! From QueryBuilder
+  const studentQuery = new QueryBuilder(Student.find(), query)
+    .search(studentSearchableFields)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const result = await studentQuery.modelQuery;
+  return result;
 };
 
 const getSingleStudentFromDB = async (id: string) => {
