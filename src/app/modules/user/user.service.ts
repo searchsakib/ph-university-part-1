@@ -7,7 +7,7 @@ import { Student } from '../student/student.model';
 import { TUser } from './user.interface';
 import { User } from './user.model';
 import { generateStudentId } from './user.utils';
-import mongoose, { startSession } from 'mongoose';
+import mongoose from 'mongoose';
 
 const createStudentIntoDB = async (password: string, payload: TStudent) => {
   // create a user object
@@ -60,11 +60,11 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
 
       return newStudent;
     }
-  } catch (err) {
+  } catch (err: any) {
     //! if any error occurs, aborting transaction & ending session
     await session.abortTransaction();
     await session.endSession();
-    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to Create student');
+    throw new Error(err);
   }
 };
 
